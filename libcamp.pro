@@ -9,5 +9,7 @@ SOURCES += main.cpp \
 
 HEADERS += \
     campmiddleware.h \
-    thread.h
+    thread.h \
+    socket_utils.h \
+    config.h
 
