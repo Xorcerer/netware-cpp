@@ -22,5 +22,5 @@ HEADERS += \
     dispatcher.h
 
 INCLUDEPATH += /usr/local/include/
-LIBPATH += /usr/local/lib/
+QMAKE_LIBDIR += /usr/local/lib/
 LIBS += -lprotobuf
