@@ -33,7 +33,10 @@ public:
 
     void close();
 
+    // Pop data from receiving buffer,
+    // safe to use it in single thread.
     bool pop(char *buffer, size_t size);
+
     int serverFd() const { return m_server_fd; }
     bool connected() const { return m_connected; }
 };
@@ -148,40 +151,42 @@ bool RecvThread::pop(char *buffer, size_t size)
 }
 
 CampMiddleware::CampMiddleware(std::string const &host, int port) :
-    m_current_msg_size(-1), m_host(host), m_port(port)
+    m_current_msg_size(-1), m_host(host), m_port(port), m_recv_thread_ptr(NULL)
 {
 
 }
 
 CampMiddleware::~CampMiddleware() throw()
 {
-    if (m_recv_thread)
-        delete m_recv_thread;
 }
 
 void CampMiddleware::start()
 {
-    m_recv_thread = new RecvThread(m_host, m_port);
-    m_recv_thread->start();
+    m_recv_thread_ptr.reset(new RecvThread(m_host, m_port));
+    m_recv_thread_ptr->start();
 }
 
 bool CampMiddleware::connected() const
 {
-    return m_recv_thread && (m_recv_thread->serverFd() > 0);
+    return m_recv_thread_ptr && (m_recv_thread_ptr->serverFd() > 0);
 }
 
 char const *CampMiddleware::popMsgToBuffer(int &msg_id, int &msg_size)
 {
-    if (!m_recv_thread)
+    if (!m_recv_thread_ptr)
         return NULL;
 
     if (m_current_msg_size < 0)
-        if (!m_recv_thread->pop(reinterpret_cast<char *>(&m_current_msg_size), sizeof(int)))
+        if (!m_recv_thread_ptr->pop(reinterpret_cast<char *>(&m_current_msg_size), sizeof(int)))
             return NULL;
 
-    if (!m_recv_thread->pop(m_buffer, m_current_msg_size))
+    // Get the size of the whole message (id size + protobuf message size).
+    if (!m_recv_thread_ptr->pop(m_buffer, m_current_msg_size))
         return NULL;
+
+    // Then the id.
     msg_id = *reinterpret_cast<int *>(m_buffer);
+
     msg_size = m_current_msg_size - sizeof(int);
     m_current_msg_size = -1;
     return m_buffer + sizeof(int);
@@ -189,7 +194,7 @@ char const *CampMiddleware::popMsgToBuffer(int &msg_id, int &msg_size)
 
 int CampMiddleware::sendBuffer(int size)
 {
-    return ::send(m_recv_thread->serverFd(), m_buffer, size, 0);
+    return ::send(m_recv_thread_ptr->serverFd(), m_buffer, size, 0);
 }
 
 }

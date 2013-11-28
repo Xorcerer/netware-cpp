@@ -6,6 +6,7 @@
 #include "config.h"
 #include "serializer.h"
 #include "dispatcher.h"
+#include "scope_ptr.h"
 
 namespace camp {
 
@@ -23,7 +24,7 @@ public:
     template <typename T>
     void dispatch(T &context)
     {
-        if (!m_recv_thread)
+        if (!m_recv_thread_ptr)
             return;
 
         int msg_id;
@@ -36,7 +37,7 @@ public:
     template <typename T>
     int send(T const &msg)
     {
-        if (!m_recv_thread)
+        if (!m_recv_thread_ptr)
             return -1;
         int msg_size = serialize(msg, m_buffer, BUFF_SIZE);
         return sendBuffer(msg_size);
@@ -49,7 +50,7 @@ private:
     int m_current_msg_size;
     std::string const m_host;
     int const m_port;
-    RecvThread *m_recv_thread;
+    camp::utils::ScopePtr<RecvThread> m_recv_thread_ptr;
     char m_buffer[BUFF_SIZE];
 };
 

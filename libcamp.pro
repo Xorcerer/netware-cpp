@@ -19,8 +19,12 @@ HEADERS += \
     protos/player.pb.h \
     protos/common.pb.h \
     message_ids.h \
-    dispatcher.h
+    dispatcher.h \
+    scope_ptr.h
 
 INCLUDEPATH += /usr/local/include/
 QMAKE_LIBDIR += /usr/local/lib/
 LIBS += -lprotobuf
+
+OTHER_FILES += \
+    protos/README.txt

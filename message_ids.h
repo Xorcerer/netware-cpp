@@ -1,6 +1,11 @@
 #ifndef MESSAGE_IDS_H
 #define MESSAGE_IDS_H
 
+/*
+ * WARNING: This file is generated automatically by script from template.
+ * DO NOT EDIT manually.
+*/
+
 #include "protos/player.pb.h"
 
 namespace camp

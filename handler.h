@@ -4,6 +4,7 @@
 namespace camp
 {
 
+// Handlers called by dispatcher.
 template <typename TMsg, typename TContext>
 void handleMessage(TMsg &msg, TContext &context);
 

@@ -9,38 +9,37 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-static int connect_socket (int port,
-                           char const * address) {
-    struct sockaddr_in a;
-    int s;
-    if ((s = socket (AF_INET, SOCK_STREAM, 0)) < 0) {
+static int connect_socket(int port, char const *address_str)
+{
+    struct sockaddr_in addr;
+    int fd;
+    if ((fd = socket (AF_INET, SOCK_STREAM, 0)) < 0)
+    {
         perror ("socket()");
-        close (s);
+        close (fd);
         return -1;
     }
 
+    memset (&addr, 0, sizeof (addr));
+    addr.sin_port = htons (port);
+    addr.sin_family = AF_INET;
 
-    memset (&a, 0, sizeof (a));
-    a.sin_port = htons (port);
-    a.sin_family = AF_INET;
-
-
-    if (!inet_aton(address, (struct in_addr *) &a.sin_addr.s_addr)) {
+    if (!inet_aton(address_str, (struct in_addr *) &addr.sin_addr.s_addr))
+    {
         perror ("bad IP address format");
-        close (s);
+        close (fd);
         return -1;
     }
 
 
-    if (connect
-        (s, (struct sockaddr *) &a,
-         sizeof (a)) < 0) {
+    if (connect(fd, (struct sockaddr *) &addr, sizeof (addr)) < 0)
+    {
         perror ("connect()");
-        shutdown (s, SHUT_RDWR);
-        close (s);
+        shutdown (fd, SHUT_RDWR);
+        close (fd);
         return -1;
     }
-    return s;
+    return fd;
 }
 
 #endif // SOCKET_UTILS_H

@@ -1,6 +1,11 @@
 #ifndef DISPATCHER_H
 #define DISPATCHER_H
 
+/*
+ * WARNING: This file is generated automatically by script from template.
+ * DO NOT EDIT manually.
+*/
+
 #include "handler.h"
 #include "serializer.h"
 #include "protos/common.pb.h"

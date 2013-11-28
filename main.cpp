@@ -1,56 +1,56 @@
+/*
+ * A Demo for campmiddleware.
+ */
 #include <iostream>
 
 #include "handler.h"
 #include "campmiddleware.h"
 #include "protos/player.pb.h"
 
-using namespace std;
 using namespace camp::protocols::player;
 
 namespace camp {
 
-// 实现消息处理函数的模板特型,对于每个Ack协议,都要实现对应的handle,否则会在编译器报错.
-// 请注意该模板特型需要放置在camp的命名空间下..
-// context由dispatch函数传入，用于传递逻辑上下文。
+// A specialization of template handleMessage<>() for each *Ack proto.
+// If any specialization of *Ack not implemented, the compiler would warn you in LINK stage.
+
+// NOTICE: The namespace sould be in `camp`.
+// `context` is passed from CampMiddleware::dispatch(), the types should match.
+
 template<>
-void handleMessage<LoginOrCreateAccountAck, string>(LoginOrCreateAccountAck &ack, string& context)
+void handleMessage<LoginOrCreateAccountAck, std::string>(LoginOrCreateAccountAck &ack, std::string &context)
 {
-    cout << "ack: " << ack.session_key() << endl;
-    cout << "context: " << context << endl;
+    std::cout << "ack: " << ack.session_key() << std::endl;
+    std::cout << "context: " << context << std::endl;
 }
 
 }
 
 int main()
 {
-    // 连接服务器,只接受ip所谓第一个参数,不接收域名.
+    // Raw ip only.
     camp::CampMiddleware mw("127.0.0.1", 11080);
-    // 启动接收线程.
     mw.start();
 
-    // 可以在主循环通过connected方法测试是否已经连接.
-    // 这里的while仅仅用于演示.
+    // Just a demo for test the connection state.
+    // DO USE IT in PRODUCTION.
     while (!mw.connected())
         sleep(1);
 
-    // 构造一个消息.
+    // Construct a message.
     LoginOrCreateAccountReq req;
     req.set_auth_token("Hello world!");
 
-    // 发送消息, 在连接上之前使用send方法无效.
-    // 返回值r,为内部调用c语言函数::send()的返回值.
+    // Send than test the error code, which is the same of POSIX ::send()
     int r = mw.send(req);
     if (r < 0)
-    {
         perror("Sent failed");
-    }
 
     std::string context = "I am context";
-    // 分发消息,应在主循环被调用,context的类型应以handleMessage方法上的context类型一致.
+    // Dispatch received messages, the context should be the same in specialization of template handleMessage<>().
     mw.dispatch(context);
 
     sleep(1);
-    cout << "Exited." << endl;
+    std::cout << "Exited." << std::endl;
     return 0;
 }
-

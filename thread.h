@@ -1,4 +1,3 @@
-// Ref: http://peter.bourgon.org/blog/2010/10/27/who-needs-boost-a-simple-pthreads-wrapper.html
 #ifndef THREAD_H
 #define THREAD_H
 
@@ -12,6 +11,7 @@ class ThreadBase;
 
 static void * threadbase_dispatcher(void *arg);
 
+// Ref: http://peter.bourgon.org/blog/2010/10/27/who-needs-boost-a-simple-pthreads-wrapper.html
 class ThreadBase
 {
 public:
